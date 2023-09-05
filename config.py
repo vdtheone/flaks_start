@@ -13,4 +13,3 @@ engine = create_engine(db_url)
 SessionLocal = sessionmaker(bind=engine)
 
 Base = declarative_base()
-

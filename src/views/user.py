@@ -2,8 +2,8 @@ from flask import *
 from src.models.user import User
 from config import SessionLocal
 from hashlib import sha256
-from flask_mail import *  
-from random import *  
+from flask_mail import *
+from random import *
 import app
 from src.utils.generate_jwt import create_access_token
 from src.utils.access_token_requied import required_access_token
@@ -13,8 +13,8 @@ from sqlalchemy.exc import IntegrityError
 
 
 JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
-ALGORITHM = os.environ.get("ALGORITHM") 
- 
+ALGORITHM = os.environ.get("ALGORITHM")
+
 
 db = SessionLocal()
 
@@ -32,36 +32,38 @@ def create_user():
 
         if not data:
             return jsonify({"error": "Invalid data format"})
-     
-        otp = randint(000000,999999)
+
+        otp = randint(000000, 999999)
 
         email = data.get("email")
         password = data.get("password")
-        
 
         if not email and not password:
             return jsonify({"error": "Email, password, or OTP is missing"}), 400
-        
+
         # Send OTP via email
         send_otp_email(email, otp)
-        
+
         password = hash_password(password)
 
         new_user = User(email=email, password=password, otp=otp)
         db.add(new_user)
         db.commit()
         return jsonify({"message": "User created successfully"})
-    
+
     except IntegrityError:
         return jsonify({"error": "Email already exist"})
 
     except Exception as e:
         return jsonify({"error": str(e)})
-    
-# Send OTP via email    
+
+
+# Send OTP via email
 def send_otp_email(recipient_email, otp):
     try:
-        msg = Message('OTP', sender='vishal262.rejoice@gmail.com', recipients=[recipient_email])
+        msg = Message(
+            "OTP", sender="vishal262.rejoice@gmail.com", recipients=[recipient_email]
+        )
         msg.body = str(otp)
         app.mail.send(msg)
     except Exception as e:
@@ -71,10 +73,10 @@ def send_otp_email(recipient_email, otp):
 def login():
     try:
         data = request.json
-        
+
         if not data:
             return jsonify({"error": "Invalid data format"}), 400
-   
+
         email = data.get("email")
         password = data.get("password")
         password = hash_password(password)
@@ -83,49 +85,54 @@ def login():
         if not email or not password or not otp_return:
             return jsonify({"error": "Email, password, or OTP is missing"}), 400
 
-        user_details = db.query(User).filter_by(email=email,password=password,otp=otp_return).first()
-        
+        user_details = (
+            db.query(User)
+            .filter_by(email=email, password=password, otp=otp_return)
+            .first()
+        )
+
         if user_details is None:
             return jsonify({"error": "email or passworrd or otp is wrong"}), 404
-        
+
         if not user_details.is_varified:
             user_details.is_varified = True
-            db.commit() 
+            db.commit()
             db.refresh(user_details)
-        
-        user_dict = {"id":user_details.id, "email":user_details.email}
+
+        user_dict = {"id": user_details.id, "email": user_details.email}
         access_token = create_access_token(user_dict)
-        
-        return jsonify({"message": "Login successful", "token":access_token})
+
+        return jsonify({"message": "Login successful", "token": access_token})
 
     except Exception as e:
         return jsonify({"error": str(e)})
- 
+
+
 @required_access_token
 def forgot():
     try:
         token = request.headers.get("Authorization").split()
         if not token:
             return jsonify({"error": "token not provided"})
-        payload = jwt.decode(token[1], JWT_SECRET_KEY,ALGORITHM)
+        payload = jwt.decode(token[1], JWT_SECRET_KEY, ALGORITHM)
 
-        user = db.query(User).filter_by(id=payload.get('id')).first()
+        user = db.query(User).filter_by(id=payload.get("id")).first()
         if not user:
             return jsonify({"error": "user not found"})
 
         if not user.is_varified:
             return jsonify({"error": "Login first"})
-        
-        otp = randint(000000,999999)
+
+        otp = randint(000000, 999999)
 
         send_otp_email(user.email, otp)
-        
+
         user.otp = otp
         db.commit()
         db.refresh(user)
 
         return jsonify({"message": "sent otp to your email id"})
-        
+
     except Exception as e:
         return jsonify({"error": str(e)})
 
@@ -135,10 +142,10 @@ def get_jwt_identity():
         token = request.headers.get("Authorization").split()
         if not token:
             return jsonify({"error": "token not provided"})
-        payload = jwt.decode(token[1], JWT_SECRET_KEY,ALGORITHM)
-        return payload.get('id')
+        payload = jwt.decode(token[1], JWT_SECRET_KEY, ALGORITHM)
+        return payload.get("id")
     except Exception as e:
-        return jsonify({"error":str(e)})
+        return jsonify({"error": str(e)})
 
 
 @required_access_token
@@ -151,8 +158,8 @@ def reset_password():
         if not data:
             return jsonify({"error": "Invalid data format"}), 400
 
-        password = data.get('password')
-        otp_return = data.get('otp')
+        password = data.get("password")
+        otp_return = data.get("otp")
 
         if not password or not otp_return:
             return jsonify({"error": "Please provide both password and OTP"}), 400
