@@ -1,8 +1,7 @@
-from flask import *
-from src.router.user_router import user_bp
-from flask_mail import *
-from random import *
+from flask import Flask
+from flask_mail import Mail
 
+from src.router.user_router import user_bp
 
 app = Flask(__name__)
 

@@ -1,16 +1,17 @@
-from flask import *
-from src.models.user import User
-from config import SessionLocal
-from hashlib import sha256
-from flask_mail import *
-from random import *
-import app
-from src.utils.generate_jwt import create_access_token
-from src.utils.access_token_requied import required_access_token
-import jwt
 import os
+from hashlib import sha256
+from random import randint
+
+import jwt
+from flask import jsonify, request
+from flask_mail import Message
 from sqlalchemy.exc import IntegrityError
 
+import app
+from config import SessionLocal
+from src.models.user import User
+from src.utils.access_token_requied import required_access_token
+from src.utils.generate_jwt import create_access_token
 
 JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
 ALGORITHM = os.environ.get("ALGORITHM")
@@ -176,5 +177,5 @@ def reset_password():
 
         return jsonify({"message": "Password reset successfully"})
 
-    except Exception as e:
+    except Exception:
         return jsonify({"error": "An error occurred while resetting the password"}), 500

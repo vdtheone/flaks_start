@@ -39,5 +39,5 @@ venv/
 .DS_Store
 Thumbs.db
 
-# config 
+# config
 config.json

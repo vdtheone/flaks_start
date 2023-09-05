@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean
-from config import Base, engine
+from sqlalchemy import Boolean, Column, Integer, String
+
+from config import Base
 
 
 class User(Base):

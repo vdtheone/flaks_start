@@ -1,6 +1,6 @@
-from flask import Blueprint, Request
-from src.views.user import create_user, login, forgot, reset_password
+from flask import Blueprint
 
+from src.views.user import create_user, forgot, login, reset_password
 
 user_bp = Blueprint("user", __name__)
 

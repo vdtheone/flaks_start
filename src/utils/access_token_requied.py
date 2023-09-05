@@ -1,7 +1,8 @@
-from flask import jsonify, request
 import os
+
 import jwt
-from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
+from flask import jsonify, request
+from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError
 
 JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
 ALGORITHM = os.environ.get("ALGORITHM")
